@@ -39,9 +39,14 @@ function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut
             end
         end
     end
-    try
+    SymbDeriv = try
         GetSymbolicDerivative(F, abs(In(InOut)), GetDerivSymb(InOut))
     catch;
+        nothing
+    end
+    if !isnothing(SymbDeriv)
+        SymbDeriv
+    else
         if Out(InOut) isa Number
             Out(InOut) ≥ 1 ? GetJac(ADmode,F) : (Out(InOut) == -1 ? GetDeriv(ADmode,F) : GetGrad(ADmode,F))
         else
@@ -62,16 +67,17 @@ function _GetSecondDeriv(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,T
         end
     else
         # Already know info about dimensions, do not call GetDoubeJac.
-        try
+        SymbDeriv = try
             GetSymbolicDerivative(dF, In(InOut), :matrixjacobian)
         catch;
-            GetMatrixJac(ADmode, dF)
+            nothing
             # if Out(InOut) == 1
             #     x->reshape(GetJac(ADmode)(vec∘dF, x), In(InOut), In(InOut))
             # else
             #     x->reshape(GetJac(ADmode)(vec∘dF, x), Out(InOut), In(InOut), In(InOut))
             # end
         end
+        !isnothing(SymbDeriv) ? SymbDeriv : GetMatrixJac(ADmode, dF)
     end
 end
 function _GetSecondDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
@@ -105,14 +111,24 @@ end
 DFunction = DerivableFunction
 
 (D::DFunction)(x) = EvalF(D, x)
-EvalF(D::DFunction, x) = D.F(x)
-EvalF(D::DFunction) = D.F
-EvaldF(D::DFunction, x) = D.dF(x)
-EvaldF(D::DFunction) = D.dF
-EvalddF(D::DFunction, x) = D.ddF(x)
-EvalddF(D::DFunction) = D.ddF
+
 In(D::DFunction) = In(D.InOut);      In(InOut::Tuple) = _content(InOut[1])
 Out(D::DFunction) = Out(D.InOut);    Out(InOut::Tuple) = _content(InOut[2])
 _content(::Val{N}) where N = _content(N)
 _content(N::Int) = N;   _content(tup::Tuple) = tup
 _content(N) = throw("Unexpected content.")
+
+
+EvalF(D::DFunction, x; kwargs...) = D.F(x; kwargs...)
+EvalF(D::DFunction) = D.F
+EvaldF(D::DFunction, x; kwargs...) = D.dF(x; kwargs...)
+EvaldF(D::DFunction) = D.dF
+EvalddF(D::DFunction, x; kwargs...) = D.ddF(x; kwargs...)
+EvalddF(D::DFunction) = D.ddF
+
+EvalF(F::Function, x; kwargs...) = F(x; kwargs...)
+EvalF(F::Function) = F
+EvaldF(F::Function, x; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, F)(x)
+EvaldF(F::Function; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, F)
+EvalddF(F::Function, x; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, GetMatrixJac(ADmode, F))(x)
+EvalddF(F::Function; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, GetMatrixJac(ADmode, F))

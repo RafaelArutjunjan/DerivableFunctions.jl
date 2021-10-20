@@ -11,6 +11,7 @@ export GetArgLength
 
 include("DFunctions.jl")
 export DFunction, DerivableFunction
+export EvalF, EvaldF, EvalddF, InOut
 
 
 include("DifferentiationOperators.jl")

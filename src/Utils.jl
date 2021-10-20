@@ -24,17 +24,19 @@ MaximalNumberOfArguments(F::Function) = maximum([length(Base.unwrap_unionall(m.s
 
 
 """
-    KillAfter(F::Function, args...; timeout::Real=5, kwargs...)
+    KillAfter(F::Function, args...; timeout::Real=5, verbose::Bool=false, kwargs...)
 Tries to evaluate a given function `F` before a set `timeout` limit is reached and interrupts the evaluation and returns `nothing` if necessary.
 NOTE: The given function is evaluated via F(args...; kwargs...).
 """
-function KillAfter(F::Function, args...; timeout::Real=5, kwargs...)
+function KillAfter(F::Function, args...; timeout::Real=5, verbose::Bool=false, kwargs...)
     Res = nothing
     G() = try F(args...; kwargs...) catch Err
-        if Err isa DivideError
-            @warn "KillAfter: Could not evaluate given Function $(nameof(F)) before timeout limit of $timeout seconds was reached."
-        else
-            @warn "KillAfter: Could not evaluate given Function $(nameof(F)) because error was thrown: $Err."
+        if verbose
+            if Err isa DivideError
+                @warn "KillAfter: Could not evaluate given Function $(nameof(F)) before timeout limit of $timeout seconds was reached."
+            else
+                @warn "KillAfter: Could not evaluate given Function $(nameof(F)) because error was thrown: $Err."
+            end
         end
     end
     task = @async(G())
