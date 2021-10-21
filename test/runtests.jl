@@ -44,16 +44,16 @@ end
     @test EvaldF(D1, 5) == 10
     @test EvalddF(D1, 5) == 2
 
-    # # R -> R^n
-    # D2 = DFunction(x->[exp(x), log(5sinh(x))])
-    # @test EvaldF(D2, rand()) isa AbstractMatrix
-    # @test EvalddF(D2, rand()) isa AbstractArray{<:Number,3}
-    #
-    # # R -> R^(n×m)
-    # D3 = DFunction(x->[exp(x) x*log(x) sinh(cosh(x)); tanh(x) x^2 2x])
-    # @test EvalF(D3, rand()) isa AbstractMatrix
-    # @test EvaldF(D3, rand()) isa AbstractArray{<:Number,3}
-    # @test EvalddF(D3, rand()) isa AbstractArray{<:Number,4}
+    # R -> R^n
+    D2 = DFunction(x->[exp(x), log(5sinh(x))])
+    @test EvaldF(D2, rand()) isa AbstractMatrix
+    @test EvalddF(D2, rand()) isa AbstractArray{<:Number,3}
+
+    # R -> R^(n×m)
+    D3 = DFunction(x->[exp(x) x*log(x) sinh(cosh(x)); tanh(x) x^2 2x])
+    @test EvalF(D3, rand()) isa AbstractMatrix
+    @test EvaldF(D3, rand()) isa AbstractArray{<:Number,3}
+    @test EvalddF(D3, rand()) isa AbstractArray{<:Number,4}
 
     # R^n -> R
     D4 = DFunction(x->x[1]^2 + x[2]^3)

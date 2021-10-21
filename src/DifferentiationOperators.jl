@@ -120,20 +120,29 @@ end
 
 GetMatrixJac(ADmode::Val; Kwargs...) = EvaluateMatrixJacobian(F::Function, X; kwargs...) = _GetMatrixJac(ADmode; Kwargs...)(F, X; kwargs...)
 GetMatrixJac(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-function GetMatrixJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Tuple=size(F(rand(m))); kwargs...)
-    EvaluateMatrixJacobian(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘F, X), f..., m)
-    EvaluateMatrixJacobian(X::AbstractVector{<:Num}) = _GetMatrixJacPass(F, X)
+
+
+_MakeTuple(Tup::Int) = (Tup,);    _MakeTuple(Tup::Tuple) = Tup
+function _SizeTuple(F::Function, m::Int)
+    T = try size(F(rand(m))) catch; size(F(rand())) end
+    _MakeTuple(T)
 end
-function GetMatrixJac(ADmode::Val{:Symbolic}, F::Function; kwargs...)
-    M = try GetSymbolicDerivative(F, :matrixjacobian; kwargs...)   catch;  nothing  end
+function GetMatrixJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m); kwargs...)
+    EvaluateMatrixJacobian(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘F, X), f..., m)
+    EvaluateMatrixJacobian(X::Number) = reshape(_GetJac(ADmode; kwargs...)(vec∘F∘(z::AbstractVector->z[1]), [X]), f..., m)
+    EvaluateMatrixJacobian(X::Union{<:Num,<:AbstractVector{<:Num}}) = _GetMatrixJacPass(F, X)
+end
+function GetMatrixJac(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m); kwargs...)
+    M = try GetSymbolicDerivative(F, m, :matrixjacobian; kwargs...)   catch;  nothing  end
     if isnothing(M)
         @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetMatrixJac(Val(:ForwardDiff), F)
+        GetMatrixJac(Val(:ForwardDiff), F, m, f)
     else M end
 end
 # For emergencies: needs an extra evaluation of function to determine length(Func(p))
 function _GetMatrixJac(ADmode::Val; kwargs...)
     Functor(Func::Function, X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘Func, X), size(Func(X))..., length(X))
+    Functor(Func::Function, X::Number) = reshape(_GetJac(ADmode; kwargs...)(vec∘Func∘(z::AbstractVector->z[1]), [X]), size(Func(X))..., 1)
 end
 
 GetDoubleJac(ADmode::Val; Kwargs...) = EvaluateDoubleJacobian(F::Function, X; kwargs...) = _GetDoubleJac(ADmode; Kwargs...)(F, X; kwargs...)
@@ -259,6 +268,7 @@ _ConsistencyCheck(Fexpr::AbstractVector{<:Num}, var::AbstractVector{<:Num}, ::Un
 _ConsistencyCheck(Fexpr::Num, var::AbstractVector{<:Num}, ::Union{Val{:gradient},Val{:hessian}}) = nothing
 _ConsistencyCheck(Fexpr::Num, var::Num, ::Val{:derivative}) = nothing
 _ConsistencyCheck(Fexpr::AbstractArray{<:Num}, var::AbstractVector{<:Num}, ::Val{:matrixjacobian}) = nothing
+ _ConsistencyCheck(Fexpr::AbstractArray{<:Num}, var::Num, ::Val{:matrixjacobian}) = nothing
 function _ConsistencyCheck(Fexpr, var, deriv::Val{T}) where T
     if T ∉ [:derivative, :gradient, :jacobian, :hessian, :doublejacobian, :matrixjacobian]
         throw("Invalid deriv type: $T.")
@@ -272,10 +282,14 @@ Executes symbolic derivative as specified by `deriv::Symbol`.
 """
 function SymbolicPassthrough(Fexpr::Union{<:AbstractArray{<:Num},<:Num}, var::Union{<:AbstractVector{<:Num},<:Num}, deriv::Symbol=:jacobian; simplify::Bool=true)
     _ConsistencyCheck(Fexpr, var, deriv)
+
+    SymbolicDoubleJacobian(V::AbstractVector{<:Num}, z::Num; simplify::Bool=true) = SymbolicDoubleJacobian(V, [z]; simplify=simplify)
     SymbolicDoubleJacobian(V::AbstractVector{<:Num}, z::AbstractVector{<:Num}; simplify::Bool=true) = SymbolicMatrixJacobian(Symbolics.jacobian(V,z),z; simplify=simplify)
+    SymbolicMatrixJacobian(M::AbstractArray{<:Num}, z::Num; simplify::Bool=true) = SymbolicMatrixJacobian(M, [z]; simplify=simplify)
     function SymbolicMatrixJacobian(M::AbstractArray{<:Num}, z::AbstractVector{<:Num}; simplify::Bool=true)
         reshape(Symbolics.jacobian(vec(M), z; simplify=simplify), size(M)..., length(z))
     end
+
     if deriv == :doublejacobian
         SymbolicDoubleJacobian(Fexpr, var; simplify=simplify)
     elseif deriv == :matrixjacobian
