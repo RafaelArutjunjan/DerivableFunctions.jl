@@ -11,6 +11,7 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+FiniteDifferences = "0.12"
 ForwardDiff = "0.10"
 ReverseDiff = "1.8, 1.9"
 Symbolics = "2, 3"
