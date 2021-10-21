@@ -6,14 +6,14 @@ function GetInLength(F::Function; kwargs...)
         return In
     elseif In == 1 # return -1 for functions that take Number instead of a Vector of length 1
         try
-            F(1.);  return -1
+            F(rand());  return -1
         catch;
-            F(ones(1)); return 1
+            F(rand(1)); return 1
         end
     end
 end
 
-GetOutLength(F::Function, In::Int=GetInLength(F)) = GetOutLength(F, (In == -1 ? 1. : ones(In)))
+GetOutLength(F::Function, In::Int=GetInLength(F)) = GetOutLength(F, (In == -1 ? rand() : rand(In)))
 function GetOutLength(F::Function, input::Union{Number,AbstractVector{<:Number}})
     output = F(input)
     output isa Number ? -1 : (output isa AbstractVector ? length(output) : size(output))
@@ -37,7 +37,7 @@ function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut
         SymbolicDeriv
     else
         if !(Out(InOut) isa Number)
-            GetMatrixJac(ADmode,F)
+            In(InOut) == -1 ? GetMatrixJac(ADmode,F,1,Out(InOut)) : GetMatrixJac(ADmode,F)
         elseif In(InOut) == -1
             Out(InOut) == -1 ? GetDeriv(ADmode,F) : GetJac(ADmode,F)
         else
@@ -46,16 +46,16 @@ function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut
     end
 end
 function _GetSecondDeriv(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
-    if !(Out(InOut) isa Number)
-        GetMatrixJac(ADmode, dF)
-    elseif Out(InOut) == -1
+    # if !(Out(InOut) isa Number)
+    #     (In(InOut) == -1 ? GetMatrixJac(ADmode,dF,1,(Out(InOut)...,1)) : GetMatrixJac(ADmode, dF))
+    if Out(InOut) isa Number && Out(InOut) == -1
         ## For scalar functions, Symbolics often produces false results.
         # try     GetSymbolicDerivative(F, 1, :hessian)   catch;  x->GetHess(ADmode)(F,x)     end
         In(InOut) == -1 ? GetDeriv(ADmode, dF) : GetHess(ADmode, F)
     else
         # Already know info about dimensions, do not call GetDoubleJac.
         SymbDeriv = try  GetSymbolicDerivative(dF, In(InOut), :matrixjacobian)  catch;  nothing end
-        !isnothing(SymbDeriv) ? SymbDeriv : GetMatrixJac(ADmode, dF)
+        !isnothing(SymbDeriv) ? SymbDeriv : (In(InOut) == -1 ? GetMatrixJac(ADmode,dF,1,(Out(InOut)...,1)) : GetMatrixJac(ADmode, dF))
     end
 end
 function _GetSecondDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))

@@ -120,8 +120,7 @@ end
 
 GetMatrixJac(ADmode::Val; Kwargs...) = EvaluateMatrixJacobian(F::Function, X; kwargs...) = _GetMatrixJac(ADmode; Kwargs...)(F, X; kwargs...)
 GetMatrixJac(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-function GetMatrixJac(ADmode::Val, F::Function, m=GetArgLength(F); kwargs...)
-    f = size(F(ones(m)))
+function GetMatrixJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Tuple=size(F(rand(m))); kwargs...)
     EvaluateMatrixJacobian(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘F, X), f..., m)
     EvaluateMatrixJacobian(X::AbstractVector{<:Num}) = _GetMatrixJacPass(F, X)
 end
@@ -139,8 +138,7 @@ end
 
 GetDoubleJac(ADmode::Val; Kwargs...) = EvaluateDoubleJacobian(F::Function, X; kwargs...) = _GetDoubleJac(ADmode; Kwargs...)(F, X; kwargs...)
 GetDoubleJac(ADmode::Val, F::DFunction; Kwargs...) = EvalddF(F)
-function GetDoubleJac(ADmode::Val, F::Function, m = GetArgLength(F); kwargs...)
-    f = length(F(ones(m)))
+function GetDoubleJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Int=length(F(rand(m))); kwargs...)
     if f == 1
         EvaluateDoubleJac(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘(z->_GetJac(ADmode; kwargs...)(F,z)), X), m, m)
         EvaluateDoubleJac(X::AbstractVector{<:Num}) = _GetDoubleJacPass(F, X)

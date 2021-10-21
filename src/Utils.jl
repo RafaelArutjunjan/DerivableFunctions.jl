@@ -70,8 +70,8 @@ end
 """
     GetArgLength(F::Function; max::Int=100) -> Int
 Attempts to determine input structure of `F`, i.e. whether it accepts `Number`s or `AbstractVector`s and of what length.
-This is achieved by successively evaluating the function on `ones(i)` until the evaluation no longer throws errors.
-As a result, `GetArgLength` will be unable to determine the correct input structure if `F` errors on `ones(i)`.
+This is achieved by successively evaluating the function on `rand(i)` until the evaluation no longer throws errors.
+As a result, `GetArgLength` will be unable to determine the correct input structure if `F` errors on `rand(i)`.
 """
 function GetArgLength(F::Function; max::Int=100)
     num = MaximalNumberOfArguments(F)
@@ -85,10 +85,10 @@ function GetArgLength(F::Function; max::Int=100)
 end
 function _GetArgLengthOutOfPlace(F::Function; max::Int=100)
     @assert max > 1
-    try     F(1.);  return 1    catch; end
+    try     F(rand());  return 1    catch; end
     for i in 1:(max+1)
         try
-            res = F(ones(i))
+            res = F(rand(i))
             isnothing(res) ? throw("pdim: Function returned Nothing for i=$i.") : res
         catch y
             (isa(y, BoundsError) || isa(y, MethodError) || isa(y, DimensionMismatch) || isa(y, ArgumentError) || isa(y, AssertionError)) && continue
@@ -118,10 +118,10 @@ function _GetArgLengthInPlace(F::Function; max::Int=100)
         !isnothing(_TryOn(RESS, input)) && return length(input)
         nothing
     end
-    X = TryAll(1.);    !isnothing(X) && return 1
+    X = TryAll(rand());    !isnothing(X) && return 1
     i = 1
     while i < max+1
-        X = TryAll(ones(i))
+        X = TryAll(rand(i))
         !isnothing(X) && return i
         i += 1
     end
