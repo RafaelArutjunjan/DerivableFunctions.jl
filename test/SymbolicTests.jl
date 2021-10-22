@@ -41,10 +41,3 @@ D5 = DFunction(F5; ADmode=Val(:ForwardDiff))
 D6 = DFunction(F6; ADmode=Val(:ForwardDiff))
 @test EvaldF(D6, CreateVariable(3)) isa AbstractArray{<:Num,3}
 @test EvalddF(D6, CreateVariable(3)) isa AbstractArray{<:Num,4}
-
-# F1!(y,x) = y = x^2
-# F2!(y,x) = y .= [exp(x), log(5sinh(x))]
-# F3!(y,x) = y .= [exp(x) x*log(x) sinh(cosh(x)); tanh(x) x^2 2x]
-# F4!(y,x) = y = x[1]^2 + x[2]^3
-# F5!(y,x) = y .= [x[1]^2+x[2]^2, exp(x[2]-x[1]), log(x[1] + x[2])]
-# F6!(y,x) = y .= [sinh(x[3]) exp(x[1])*sin(x[2]) 0 x[2]; 0 cosh(x[2]) cos(x[2])*x[3]*x[2] x[3]]

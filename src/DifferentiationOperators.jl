@@ -14,28 +14,28 @@ GetDeriv(ADmode::Symbol, args...; kwargs...) = GetDeriv(Val(ADmode), args...; kw
 """
     GetGrad(ADmode::Symbol; kwargs...) -> Function
 Returns a function which generates gradients via the method specified by `ADmode`.
-For available backends, see `InformationGeometry.diff_backends()`.
+For available backends, see `diff_backends()`.
 This outputted function has argument structure `(F::Function, x::AbstractVector) -> AbstractVector`.
 """
 GetGrad(ADmode::Symbol, args...; kwargs...) = GetGrad(Val(ADmode), args...; kwargs...)
 """
     GetJac(ADmode::Symbol; kwargs...) -> Function
 Returns a function which generates jacobians via the method specified by `ADmode`.
-For available backends, see `InformationGeometry.diff_backends()`.
+For available backends, see `diff_backends()`.
 This outputted function has argument structure `(F::Function, x::AbstractVector) -> AbstractMatrix`.
 """
 GetJac(ADmode::Symbol, args...; kwargs...) = GetJac(Val(ADmode), args...; kwargs...)
 """
     GetHess(ADmode::Symbol; kwargs...) -> Function
 Returns a function which generates hessians via the method specified by `ADmode`.
-For available backends, see `InformationGeometry.diff_backends()`.
+For available backends, see `diff_backends()`.
 This outputted function has argument structure `(F::Function, x::Number) -> AbstractMatrix`.
 """
 GetHess(ADmode::Symbol, args...; kwargs...) = GetHess(Val(ADmode), args...; kwargs...)
 """
     GetDoubleJac(ADmode::Symbol; kwargs...) -> Function
 Returns second derivatives of a vector-valued function via the method specified by `ADmode`.
-For available backends, see `InformationGeometry.diff_backends()`.
+For available backends, see `diff_backends()`.
 This outputted function has argument structure `(F::Function, x::AbstractVector) -> AbstractArray{3}`.
 
 THIS FEATURE IS STILL EXPERIMENTAL.
@@ -44,7 +44,7 @@ GetDoubleJac(ADmode::Symbol, args...; kwargs...) = GetDoubleJac(Val(ADmode), arg
 """
     GetMatrixJac(ADmode::Symbol; kwargs...) -> Function
 Returns second derivatives of an array-valued function via the method specified by `ADmode`.
-For available backends, see `InformationGeometry.diff_backends()`.
+For available backends, see `diff_backends()`.
 This outputted function has argument structure `(F::Function, x::AbstractVector) -> AbstractArray{n+1}` if `F` outputs `AbstractArray{n}`.
 
 THIS FEATURE IS STILL EXPERIMENTAL.
@@ -219,7 +219,7 @@ GetJac!(ADmode::Val, args...; kwargs...) = _GetJac!(ADmode, args...; kwargs...)
 GetHess!(ADmode::Val, args...; kwargs...) = _GetHess!(ADmode, args...; kwargs...)
 GetMatrixJac!(ADmode::Val, args...; kwargs...) = _GetMatrixJac!(ADmode, args...; kwargs...)
 
-
+# Evaluation of differentation operations into pre-specified arrays for functions which are themselves out-of-place
 function GetGrad!(ADmode::Val, F::Function; kwargs...)
     EvaluateGradient!(Y::AbstractVector{<:Number}, X::AbstractVector{<:Number}) = _GetGrad!(ADmode; kwargs...)(Y, F, X)
     EvaluateGradient!(Y::AbstractVector{<:Num}, X::AbstractVector{<:Num}) = _GetGradPass!(Y, F, X)
@@ -235,23 +235,43 @@ end
 
 # Looks like for in-place functor jacobian! there is no difference for any array shape
 function GetMatrixJac!(ADmode::Val, F::Function; kwargs...)
-    # m = GetArgLength(F);    f = size(F(ones(m)))
-    EvaluateMatrixJacobian(Y::AbstractArray{<:Number}, X::AbstractVector{<:Number}) = _GetJac!(ADmode; kwargs...)(Y, F, X) # DELIBERATE!!!! GetJac!() recognizes output format from given Array
+    EvaluateMatrixJacobian(Y::AbstractArray{<:Number}, X::AbstractVector{<:Number}) = _GetMatrixJac!(ADmode; kwargs...)(Y, F, X)
     EvaluateMatrixJacobian(Y::AbstractArray{<:Num}, X::AbstractVector{<:Num}) = _GetMatrixJacPass!(Y, F, X)
 end
 
-# Fall back to ForwarDiff as standard
+# Fall back to ForwardDiff as standard
 _GetGrad!(ADmode::Val{true}; kwargs...) = _GetGrad!(Val(:ForwardDiff); kwargs...)
 _GetJac!(ADmode::Val{true}; kwargs...) = _GetJac!(Val(:ForwardDiff); kwargs...)
 _GetHess!(ADmode::Val{true}; kwargs...) = _GetHess!(Val(:ForwardDiff); kwargs...)
+_GetMatrixJac!(ADmode::Val{true}; kwargs...) = _GetMatrixJac!(Val(:ForwardDiff); kwargs...)
 
 _GetGrad!(ADmode::Val{:ForwardDiff}; kwargs...) = ForwardDiff.gradient!
 _GetJac!(ADmode::Val{:ForwardDiff}; kwargs...) = ForwardDiff.jacobian!
 _GetHess!(ADmode::Val{:ForwardDiff}; kwargs...) = ForwardDiff.hessian!
+_GetMatrixJac!(ADmode::Val{:ForwardDiff}; kwargs...) = _GetJac!(ADmode; kwargs...) # DELIBERATE!!!! _GetJac!() recognizes output format from given Array
+
 _GetGrad!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.gradient!
 _GetJac!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.jacobian!
 _GetHess!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.hessian!
+_GetMatrixJac!(ADmode::Val{:ReverseDiff}; kwargs...) = _GetJac!(ADmode; kwargs...) # DELIBERATE!!!! _GetJac!() recognizes output format from given Array
 
+# Fake in-place
+function _GetGrad!(ADmode::Union{<:Val{:Zygote},<:Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+    FakeInPlaceGrad!(Y::AbstractVector,F::Function,X::AbstractVector) = (Y .= _GetGrad(ADmode; kwargs...)(F, X))
+end
+function _GetJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+    FakeInPlaceJac!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetJac(ADmode; kwargs...)(F, X))
+end
+function _GetHess!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+    FakeInPlaceHess!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetHess(ADmode; kwargs...)(F, X))
+end
+function _GetMatrixJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+    FakeInPlaceMatrixJac!(Y::AbstractArray,F::Function,X::AbstractVector) = (Y[:] .= vec(_GetJac(ADmode; kwargs...)(F, X)))
+end
 
 # Need to extend this to functions F which are themselves also in-place
 _GetGradPass!(Y, F::Function, X) = (Y.=SymbolicPassthrough(F(X), X, :gradient))
