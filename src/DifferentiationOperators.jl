@@ -266,8 +266,7 @@ _ConsistencyCheck(Fexpr, var, deriv::Symbol) = _ConsistencyCheck(Fexpr, var, Val
 _ConsistencyCheck(Fexpr::AbstractVector{<:Num}, var::AbstractVector{<:Num}, ::Union{Val{:jacobian},Val{:doublejacobian}}) = nothing
 _ConsistencyCheck(Fexpr::Num, var::AbstractVector{<:Num}, ::Union{Val{:gradient},Val{:hessian}}) = nothing
 _ConsistencyCheck(Fexpr::Num, var::Num, ::Val{:derivative}) = nothing
-_ConsistencyCheck(Fexpr::AbstractArray{<:Num}, var::AbstractVector{<:Num}, ::Val{:matrixjacobian}) = nothing
- _ConsistencyCheck(Fexpr::AbstractArray{<:Num}, var::Num, ::Val{:matrixjacobian}) = nothing
+_ConsistencyCheck(Fexpr::AbstractArray{<:Num}, var::Union{<:Num,<:AbstractVector{<:Num}}, ::Val{:matrixjacobian}) = nothing
 function _ConsistencyCheck(Fexpr, var, deriv::Val{T}) where T
     if T ∉ [:derivative, :gradient, :jacobian, :hessian, :doublejacobian, :matrixjacobian]
         throw("Invalid deriv type: $T.")
@@ -305,7 +304,7 @@ Special care has to be taken that the correct `inputdim` is specified! Silent er
 function GetSymbolicDerivative(F::Function, inputdim::Int=GetArgLength(F), deriv::Symbol=:jacobian; timeout::Real=5, kwargs...)
     @assert deriv ∈ [:derivative, :gradient, :jacobian, :hessian, :doublejacobian, :matrixjacobian]
     @variables x X[1:inputdim]
-    var = inputdim > 1 ? X : (try F(1.0); x catch; X end)
+    var = inputdim > 1 ? X : (try F(rand()); x catch; X end)
     Fexpr = KillAfter(F, var; timeout=timeout)
     # Warning already thrown in KillAfter
     isnothing(Fexpr) && return nothing
