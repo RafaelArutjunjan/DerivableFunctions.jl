@@ -63,80 +63,79 @@ GetMatrixJac(F::Function, args...; kwargs...) = GetMatrixJac(Val(:ForwardDiff), 
 
 
 GetDeriv(ADmode::Val; Kwargs...) = EvaluateDerivative(F::Function, X; kwargs...) = _GetDeriv(ADmode; Kwargs...)(F, X; kwargs...)
-GetDeriv(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-function GetDeriv(ADmode::Val, F::Function; kwargs...)
+GetDeriv(ADmode::Val, F::DFunction, args...; Kwargs...) = EvaldF(F)
+function GetDeriv(ADmode::Val, F::Function, args...; kwargs...)
     EvaluateDeriv(X::Number) = _GetDeriv(ADmode; kwargs...)(F, X)
     EvaluateDeriv(X::Num) = _GetDerivPass(F, X)
 end
-function GetDeriv(ADmode::Val{:Symbolic}, F::Function; kwargs...)
+function GetDeriv(ADmode::Val{:Symbolic}, F::Function, args...; verbose::Bool=true, kwargs...)
     M = try GetSymbolicDerivative(F, 1, :derivative; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
         GetDeriv(Val(:ForwardDiff), F)
     else M end
 end
 
 GetGrad(ADmode::Val; Kwargs...) = EvaluateGradient(F::Function, X; kwargs...) = _GetGrad(ADmode; Kwargs...)(F, X; kwargs...)
-GetGrad(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-function GetGrad(ADmode::Val, F::Function; kwargs...)
+GetGrad(ADmode::Val, F::DFunction, args...; Kwargs...) = EvaldF(F)
+function GetGrad(ADmode::Val, F::Function, args...; kwargs...)
     EvaluateGradient(X::AbstractVector{<:Number}) = _GetGrad(ADmode; kwargs...)(F, X)
     EvaluateGradient(X::AbstractVector{<:Num}) = _GetGradPass(F, X)
 end
-function GetGrad(ADmode::Val{:Symbolic}, F::Function; kwargs...)
-    M = try GetSymbolicDerivative(F, :gradient; kwargs...)   catch;  nothing  end
+function GetGrad(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), args...; verbose::Bool=true, kwargs...)
+    M = try GetSymbolicDerivative(F, m, :gradient; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetGrad(Val(:ForwardDiff), F)
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
+        GetGrad(Val(:ForwardDiff), F, m, args...)
     else M end
 end
 
 GetJac(ADmode::Val; Kwargs...) = EvaluateJacobian(F::Function, X; kwargs...) = _GetJac(ADmode; Kwargs...)(F, X; kwargs...)
-GetJac(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-function GetJac(ADmode::Val, F::Function; kwargs...)
+GetJac(ADmode::Val, F::DFunction, args...; Kwargs...) = EvaldF(F)
+function GetJac(ADmode::Val, F::Function, args...; kwargs...)
     EvaluateJacobian(X::AbstractVector{<:Number}) = _GetJac(ADmode; kwargs...)(F, X)
     EvaluateJacobian(X::AbstractVector{<:Num}) = _GetJacPass(F, X)
 end
-function GetJac(ADmode::Val{:Symbolic}, F::Function; kwargs...)
-    M = try GetSymbolicDerivative(F, :jacobian; kwargs...)   catch;  nothing  end
+function GetJac(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), args...; verbose::Bool=true, kwargs...)
+    M = try GetSymbolicDerivative(F, m, :jacobian; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetJac(Val(:ForwardDiff), F)
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
+        GetJac(Val(:ForwardDiff), F, m, args...)
     else M end
 end
 
 GetHess(ADmode::Val; Kwargs...) = EvaluateHessian(F::Function, X; kwargs...) = _GetHess(ADmode; Kwargs...)(F, X; kwargs...)
-GetHess(ADmode::Val, F::DFunction; Kwargs...) = EvalddF(F)
-function GetHess(ADmode::Val, F::Function; kwargs...)
+GetHess(ADmode::Val, F::DFunction, args...; Kwargs...) = EvalddF(F)
+function GetHess(ADmode::Val, F::Function, args...; kwargs...)
     EvaluateHess(X::AbstractVector{<:Number}) = _GetHess(ADmode; kwargs...)(F, X)
     EvaluateHess(X::AbstractVector{<:Num}) = _GetHessPass(F, X)
 end
-function GetHess(ADmode::Val{:Symbolic}, F::Function; kwargs...)
-    M = try GetSymbolicDerivative(F, :hessian; kwargs...)   catch;  nothing  end
+function GetHess(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), args...; verbose::Bool=true, kwargs...)
+    M = try GetSymbolicDerivative(F, m, :hessian; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetHess(Val(:ForwardDiff), F)
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
+        GetHess(Val(:ForwardDiff), F, m, args...)
     else M end
 end
 
 GetMatrixJac(ADmode::Val; Kwargs...) = EvaluateMatrixJacobian(F::Function, X; kwargs...) = _GetMatrixJac(ADmode; Kwargs...)(F, X; kwargs...)
-GetMatrixJac(ADmode::Val, F::DFunction; Kwargs...) = EvaldF(F)
-
+GetMatrixJac(ADmode::Val, F::DFunction, args...; Kwargs...) = EvaldF(F)
 
 _MakeTuple(Tup::Int) = (Tup,);    _MakeTuple(Tup::Tuple) = Tup
 function _SizeTuple(F::Function, m::Int)
     T = try size(F(rand(m))) catch; size(F(rand())) end
     _MakeTuple(T)
 end
-function GetMatrixJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m); kwargs...)
+function GetMatrixJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m), args...; kwargs...)
     EvaluateMatrixJacobian(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘F, X), f..., m)
     EvaluateMatrixJacobian(X::Number) = reshape(_GetJac(ADmode; kwargs...)(vec∘F∘(z::AbstractVector->z[1]), [X]), f..., m)
     EvaluateMatrixJacobian(X::Union{<:Num,<:AbstractVector{<:Num}}) = _GetMatrixJacPass(F, X)
 end
-function GetMatrixJac(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m); kwargs...)
+function GetMatrixJac(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), f::Tuple=_SizeTuple(F,m), args...; verbose::Bool=true, kwargs...)
     M = try GetSymbolicDerivative(F, m, :matrixjacobian; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetMatrixJac(Val(:ForwardDiff), F, m, f)
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
+        GetMatrixJac(Val(:ForwardDiff), F, m, f, args...)
     else M end
 end
 # For emergencies: needs an extra evaluation of function to determine length(Func(p))
@@ -146,8 +145,8 @@ function _GetMatrixJac(ADmode::Val; kwargs...)
 end
 
 GetDoubleJac(ADmode::Val; Kwargs...) = EvaluateDoubleJacobian(F::Function, X; kwargs...) = _GetDoubleJac(ADmode; Kwargs...)(F, X; kwargs...)
-GetDoubleJac(ADmode::Val, F::DFunction; Kwargs...) = EvalddF(F)
-function GetDoubleJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Int=length(F(rand(m))); kwargs...)
+GetDoubleJac(ADmode::Val, F::DFunction, args...; Kwargs...) = EvalddF(F)
+function GetDoubleJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Int=length(F(rand(m))), args...; kwargs...)
     if f == 1
         EvaluateDoubleJac(X::AbstractVector{<:Number}) = reshape(_GetJac(ADmode; kwargs...)(vec∘(z->_GetJac(ADmode; kwargs...)(F,z)), X), m, m)
         EvaluateDoubleJac(X::AbstractVector{<:Num}) = _GetDoubleJacPass(F, X)
@@ -156,11 +155,11 @@ function GetDoubleJac(ADmode::Val, F::Function, m::Int=GetArgLength(F), f::Int=l
         EvaluateDoubleJacobian(X::AbstractVector{<:Num}) = _GetDoubleJacPass(F, X)
     end
 end
-function GetDoubleJac(ADmode::Val{:Symbolic}, F::Function; kwargs...)
-    M = try GetSymbolicDerivative(F, :doublejacobian; kwargs...)   catch;  nothing  end
+function GetDoubleJac(ADmode::Val{:Symbolic}, F::Function, m::Int=GetArgLength(F), f::Int=length(F(rand(m))), args...; verbose::Bool=true, kwargs...)
+    M = try GetSymbolicDerivative(F, m, :doublejacobian; kwargs...)   catch;  nothing  end
     if isnothing(M)
-        @warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff."
-        GetDoubleJac(Val(:ForwardDiff), F)
+        verbose && (@warn "Unable to compute symbolic derivative of $F, falling back to ForwardDiff.")
+        GetDoubleJac(Val(:ForwardDiff), F, m, f, args...)
     else M end
 end
 # For emergencies: needs an extra evaluation of function to determine length(Func(p))

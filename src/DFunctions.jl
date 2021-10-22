@@ -18,42 +18,43 @@ GetInOut(F::Function) = (In = GetInLength(F);    Out = GetOutLength(F,In);    (I
 GetInOut(F::Function, input::Union{Number, AbstractVector{<:Number}}) = (length(input), GetOutLength(F,input))
 
 
-function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
-    function GetDerivSymb(InOut::Tuple{Int,Union{Int,Tuple}})
-        if !(Out(InOut) isa Number)
-            :matrixjacobian
-        elseif In(InOut) == -1
-            Out(InOut) == -1 ? :derivative : :jacobian
-        else
-            Out(InOut) == -1 ? :gradient : :jacobian
-        end
-    end
-    SymbolicDeriv = try GetSymbolicDerivative(F, abs(In(InOut)), GetDerivSymb(InOut))   catch;  nothing end
-    if !isnothing(SymbolicDeriv)
-        SymbolicDeriv
-    else
+function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
+    # function GetDerivSymb(InOut::Tuple{Int,Union{Int,Tuple}})
+    #     if !(Out(InOut) isa Number)
+    #         :matrixjacobian
+    #     elseif In(InOut) == -1
+    #         Out(InOut) == -1 ? :derivative : :jacobian
+    #     else
+    #         Out(InOut) == -1 ? :gradient : :jacobian
+    #     end
+    # end
+    # SymbolicDeriv = try GetSymbolicDerivative(F, abs(In(InOut)), GetDerivSymb(InOut))   catch;  nothing end
+    # if !isnothing(SymbolicDeriv)
+    #     SymbolicDeriv
+    # else
         if !(Out(InOut) isa Number)
             GetMatrixJac(ADmode,F,abs(In(InOut)),_MakeTuple(Out(InOut)))
         elseif In(InOut) == -1
             # Out is an Int but must be Tuple
             Out(InOut) == -1 ? GetDeriv(ADmode,F) : GetMatrixJac(ADmode,F,abs(In(InOut)),_MakeTuple(Out(InOut)))
         else
-            Out(InOut) == -1 ? GetGrad(ADmode,F) : GetJac(ADmode,F)
+            Out(InOut) == -1 ? GetGrad(ADmode,F,abs(In(InOut))) : GetJac(ADmode,F,abs(In(InOut)))
         end
-    end
+    # end
 end
-function _GetSecondDeriv(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
+function _GetSecondDeriv(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
     if Out(InOut) isa Number && Out(InOut) == -1
         ## For scalar functions, Symbolics often produces false results.
         # try     GetSymbolicDerivative(F, 1, :hessian)   catch;  x->GetHess(ADmode)(F,x)     end
-        In(InOut) == -1 ? GetDeriv(ADmode, dF) : GetHess(ADmode, F)
+        In(InOut) == -1 ? GetDeriv(ADmode, dF) : GetHess(Val(:ForwardDiff), F, abs(In(InOut)))
     else
-        # Already know info about dimensions, do not call GetDoubleJac.
-        SymbDeriv = try  GetSymbolicDerivative(dF, abs(In(InOut)), :matrixjacobian)  catch;  nothing end
-        !isnothing(SymbDeriv) ? SymbDeriv : GetMatrixJac(ADmode,dF,abs(In(InOut)),(Out(InOut)...,abs(In(InOut))))
+        ## Already know info about dimensions, do not call GetDoubleJac.
+        # SymbDeriv = try  GetSymbolicDerivative(dF, abs(In(InOut)), :matrixjacobian)  catch;  nothing end
+        # !isnothing(SymbDeriv) ? SymbDeriv : GetMatrixJac(ADmode,dF,abs(In(InOut)),(Out(InOut)...,abs(In(InOut))))
+        GetMatrixJac(ADmode,dF,abs(In(InOut)),(Out(InOut)...,abs(In(InOut))))
     end
 end
-function _GetSecondDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
+function _GetSecondDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
     _GetSecondDeriv(F, _GetFirstDeriv(F,InOut;ADmode=ADmode), InOut; ADmode=ADmode)
 end
 
@@ -67,10 +68,10 @@ mutable struct DerivableFunction <: Function
     dF::Function
     ddF::Function
     InOut::Tuple{Val,Val}
-    function DerivableFunction(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
+    function DerivableFunction(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
         DerivableFunction(F, _GetFirstDeriv(F,InOut;ADmode=ADmode), InOut; ADmode=ADmode)
     end
-    function DerivableFunction(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:ForwardDiff))
+    function DerivableFunction(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
         DerivableFunction(F, dF, _GetSecondDeriv(F,dF,InOut;ADmode=ADmode), InOut)
     end
     function DerivableFunction(F::Function, dF::Function, ddF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F))
