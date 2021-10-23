@@ -191,9 +191,9 @@ _GetGrad(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwa
 _GetJac(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwargs...) -> Zygote.jacobian(Func, p; kwargs...)[1]
 _GetHess(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwargs...) -> Zygote.hessian(Func, p; kwargs...)
 # Deriv not available for FiniteDifferences
-_GetGrad(ADmode::Val{:FiniteDiff}; order::Int=3, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.grad(central_fdm(order,1), Func, p; kwargs...)[1]
-_GetJac(ADmode::Val{:FiniteDiff}; order::Int=3, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.jacobian(central_fdm(order,1), Func, p; kwargs...)[1]
-_GetHess(ADmode::Val{:FiniteDiff}; order::Int=5, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.jacobian(central_fdm(order,1), z->FiniteDifferences.grad(central_fdm(order,1), Func, z)[1], p)[1]
+_GetGrad(ADmode::Union{<:Val{:FiniteDiff},<:Val{:FiniteDifferences}}; order::Int=3, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.grad(central_fdm(order,1), Func, p; kwargs...)[1]
+_GetJac(ADmode::Union{<:Val{:FiniteDiff},<:Val{:FiniteDifferences}}; order::Int=3, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.jacobian(central_fdm(order,1), Func, p; kwargs...)[1]
+_GetHess(ADmode::Union{<:Val{:FiniteDiff},<:Val{:FiniteDifferences}}; order::Int=5, kwargs...) = (Func::Function,p;Kwargs...) -> FiniteDifferences.jacobian(central_fdm(order,1), z->FiniteDifferences.grad(central_fdm(order,1), Func, z)[1], p)[1]
 
 
 ## User has passed either Num or Vector{Num} to function, try to perfom symbolic passthrough
@@ -256,20 +256,20 @@ _GetHess!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.hessian!
 _GetMatrixJac!(ADmode::Val{:ReverseDiff}; kwargs...) = _GetJac!(ADmode; kwargs...) # DELIBERATE!!!! _GetJac!() recognizes output format from given Array
 
 # Fake in-place
-function _GetGrad!(ADmode::Union{<:Val{:Zygote},<:Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
-    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+function _GetGrad!(ADmode::Union{<:Val{:Zygote},<:Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator GetGrad!() for ADmode=$ADmode because backend does not supply appropriate method.")
     FakeInPlaceGrad!(Y::AbstractVector,F::Function,X::AbstractVector) = (Y .= _GetGrad(ADmode; kwargs...)(F, X))
 end
-function _GetJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
-    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+function _GetJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator GetJac!() for ADmode=$ADmode because backend does not supply appropriate method.")
     FakeInPlaceJac!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetJac(ADmode; kwargs...)(F, X))
 end
-function _GetHess!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
-    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+function _GetHess!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator GetHess!() for ADmode=$ADmode because backend does not supply appropriate method.")
     FakeInPlaceHess!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetHess(ADmode; kwargs...)(F, X))
 end
-function _GetMatrixJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff}}; verbose::Bool=true, kwargs...)
-    verbose && (@warn "Using fake in-place differentiation operator for ADmode=$ADmode because backend does not supply appropriate method.")
+function _GetMatrixJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
+    verbose && (@warn "Using fake in-place differentiation operator GetMatrixJac!() for ADmode=$ADmode because backend does not supply appropriate method.")
     FakeInPlaceMatrixJac!(Y::AbstractArray,F::Function,X::AbstractVector) = (Y[:] .= vec(_GetJac(ADmode; kwargs...)(F, X)))
 end
 
