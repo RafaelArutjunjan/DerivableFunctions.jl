@@ -7,6 +7,10 @@
 
 This package provides a front-end for differentiation operations in Julia that allows for code which is agnostic with respect to many of the available automatic and symbolic differentiation tools available in Julia. Moreover, the differentiation operators provided by **DerivableFunctions.jl** are also overloaded to allow for passthrough of symbolic variables. That is, if symbolic types such as `Symbolics.Num` are detected, the differentiation operators automatically switch to symbolic differentiation.
 
+In addition to these operators, **DerivableFunctions.jl** also provides the `DFunction` type, which stores methods for the first and second derivatives to allow for more convenient and potentially more performant computations if the derivatives are known.
+
+For detailed examples, please see the [**documentation**](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev).
+
 ```julia
 julia> D = DFunction(x->[exp(x[1]^2 - x[2]), log(sin(x[2]))])
 (::DerivableFunction) (generic function with 1 method)
