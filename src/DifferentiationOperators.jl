@@ -258,15 +258,15 @@ _GetMatrixJac!(ADmode::Val{:ReverseDiff}; kwargs...) = _GetJac!(ADmode; kwargs..
 # Fake in-place
 function _GetGrad!(ADmode::Union{<:Val{:Zygote},<:Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
     verbose && (@warn "Using fake in-place differentiation operator GetGrad!() for ADmode=$ADmode because backend does not supply appropriate method.")
-    FakeInPlaceGrad!(Y::AbstractVector,F::Function,X::AbstractVector) = (Y .= _GetGrad(ADmode; kwargs...)(F, X))
+    FakeInPlaceGrad!(Y::AbstractVector,F::Function,X::AbstractVector) = copyto!(Y, _GetGrad(ADmode; kwargs...)(F, X))
 end
 function _GetJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
     verbose && (@warn "Using fake in-place differentiation operator GetJac!() for ADmode=$ADmode because backend does not supply appropriate method.")
-    FakeInPlaceJac!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetJac(ADmode; kwargs...)(F, X))
+    FakeInPlaceJac!(Y::AbstractMatrix,F::Function,X::AbstractVector) = copyto!(Y, _GetJac(ADmode; kwargs...)(F, X))
 end
 function _GetHess!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
     verbose && (@warn "Using fake in-place differentiation operator GetHess!() for ADmode=$ADmode because backend does not supply appropriate method.")
-    FakeInPlaceHess!(Y::AbstractMatrix,F::Function,X::AbstractVector) = (Y .= _GetHess(ADmode; kwargs...)(F, X))
+    FakeInPlaceHess!(Y::AbstractMatrix,F::Function,X::AbstractVector) = copyto!(Y, _GetHess(ADmode; kwargs...)(F, X))
 end
 function _GetMatrixJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:FiniteDifferences}}; verbose::Bool=true, kwargs...)
     verbose && (@warn "Using fake in-place differentiation operator GetMatrixJac!() for ADmode=$ADmode because backend does not supply appropriate method.")
@@ -274,10 +274,10 @@ function _GetMatrixJac!(ADmode::Union{Val{:Zygote},Val{:FiniteDiff},<:Val{:Finit
 end
 
 # Need to extend this to functions F which are themselves also in-place
-_GetGradPass!(Y, F::Function, X) = (Y.=SymbolicPassthrough(F(X), X, :gradient))
-_GetJacPass!(Y, F::Function, X) = (Y.=SymbolicPassthrough(F(X), X, :jacobian))
-_GetHessPass!(Y, F::Function, X) = (Y.=SymbolicPassthrough(F(X), X, :hessian))
-_GetMatrixJacPass!(Y, F::Function, X) = (Y.=SymbolicPassthrough(F(X), X, :matrixjacobian))
+_GetGradPass!(Y, F::Function, X) = copyto!(Y, SymbolicPassthrough(F(X), X, :gradient))
+_GetJacPass!(Y, F::Function, X) = copyto!(Y, SymbolicPassthrough(F(X), X, :jacobian))
+_GetHessPass!(Y, F::Function, X) = copyto!(Y, SymbolicPassthrough(F(X), X, :hessian))
+_GetMatrixJacPass!(Y, F::Function, X) = copyto!(Y, SymbolicPassthrough(F(X), X, :matrixjacobian))
 
 
 
