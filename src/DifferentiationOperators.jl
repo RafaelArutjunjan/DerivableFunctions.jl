@@ -52,7 +52,7 @@ THIS FEATURE IS STILL EXPERIMENTAL.
 GetMatrixJac(ADmode::Symbol, args...; kwargs...) = GetMatrixJac(Val(ADmode), args...; kwargs...)
 
 
-# ForwarDiff as standard
+# ForwardDiff as standard
 GetDeriv(F::Function, args...; kwargs...) = GetDeriv(Val(:ForwardDiff), F, args...; kwargs...)
 GetGrad(F::Function, args...; kwargs...) = GetGrad(Val(:ForwardDiff), F, args...; kwargs...)
 GetJac(F::Function, args...; kwargs...) = GetJac(Val(:ForwardDiff), F, args...; kwargs...)
@@ -218,6 +218,14 @@ GetGrad!(ADmode::Val, args...; kwargs...) = _GetGrad!(ADmode, args...; kwargs...
 GetJac!(ADmode::Val, args...; kwargs...) = _GetJac!(ADmode, args...; kwargs...)
 GetHess!(ADmode::Val, args...; kwargs...) = _GetHess!(ADmode, args...; kwargs...)
 GetMatrixJac!(ADmode::Val, args...; kwargs...) = _GetMatrixJac!(ADmode, args...; kwargs...)
+
+
+# ForwardDiff as standard
+GetGrad!(F::Function, args...; kwargs...) = GetGrad!(Val(:ForwardDiff), F, args...; kwargs...)
+GetJac!(F::Function, args...; kwargs...) = GetJac!(Val(:ForwardDiff), F, args...; kwargs...)
+GetHess!(F::Function, args...; kwargs...) = GetHess!(Val(:ForwardDiff), F, args...; kwargs...)
+GetMatrixJac!(F::Function, args...; kwargs...) = GetMatrixJac!(Val(:ForwardDiff), F, args...; kwargs...)
+
 
 # Evaluation of differentation operations into pre-specified arrays for functions which are themselves out-of-place
 function GetGrad!(ADmode::Val, F::Function; kwargs...)
