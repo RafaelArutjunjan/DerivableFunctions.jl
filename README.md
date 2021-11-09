@@ -1,8 +1,12 @@
 # DerivableFunctions
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev)
-[![Build Status](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/workflows/CI/badge.svg)](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions)
+*A Julia package for backend-agnostic differentiation combined with symbolic passthrough.*
+
+| **Documentation** | **Build Status** |
+|:-----------------:|:----------------:|
+| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) |
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/RafaelArutjunjan/DerivableFunctions.jl?svg=true)](https://ci.appveyor.com/project/RafaelArutjunjan/DerivableFunctions-jl) [![Codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
 
 
 This package provides a front-end for differentiation operations in Julia that allows for code written by the user to be agnostic with respect to many of the available automatic and symbolic differentiation tools available in Julia. Moreover, the differentiation operators provided by **DerivableFunctions.jl** are overloaded to allow for passthrough of symbolic variables. That is, if symbolic types such as `Symbolics.Num` are detected, the differentiation operators automatically switch to symbolic differentiation.
