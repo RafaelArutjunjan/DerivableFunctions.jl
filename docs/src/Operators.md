@@ -17,7 +17,8 @@ Moreover, these operators are overloaded to allow for passthrough of symbolic va
 ```@example 1
 using Symbolics
 @variables z[1:2]
-Jac(z)
+J = Jac(z)
+J[:,:,1], J[:,:,2]
 ```
 
 Since the function `Metric` in this example can be represented in terms of analytic expressions, it is also possible to construct its derivative symbolically:
@@ -39,6 +40,7 @@ Just like the out-of-place versions, the in-place operators are overloaded for s
 ```@example 1
 Ynum = Array{Num}(undef, 2, 2, 2)
 Jac!(Ynum, z)
+Ynum[:,:,1], Ynum[:,:,2]
 ```
 
 The exported in-place operators include `GetGrad!(), GetHess!(), GetJac!()` and `GetMatrixJac!()`.
