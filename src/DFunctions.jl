@@ -71,6 +71,7 @@ mutable struct DerivableFunction <: Function
         @assert In(InOut) ≥ -1 && (Out(InOut) isa Number ? (Out(InOut) ≥ -1) : all(x->x≥1, Out(InOut)))
         new(F, dF, ddF, InOut)
     end
+    DerivableFunction(D::DerivableFunction, args...; kwargs...) = D
 end
 DFunction = DerivableFunction
 
@@ -93,7 +94,16 @@ EvalddF(D::DFunction) = D.ddF
 
 EvalF(F::Function, x; kwargs...) = F(x; kwargs...)
 EvalF(F::Function) = F
+
+# No inference is performed on the input function here, it is assumed to not output scalar values
 EvaldF(F::Function, x; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, F)(x)
 EvaldF(F::Function; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, F)
 EvalddF(F::Function, x; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, GetMatrixJac(ADmode, F))(x)
 EvalddF(F::Function; ADmode::Union{Symbol,Val}=Val(:ForwardDiff)) = GetMatrixJac(ADmode, GetMatrixJac(ADmode, F))
+
+
+_InputSpace(D::DFunction) = _SpaceWord(In(D))
+_OutputSpace(D::DFunction) = _SpaceWord(Out(D))
+_SpaceWord(n::Int) = n == -1 ? "R" : "R^$n"
+_SpaceWord(Tup::Tuple) = "R^(" * prod([string(n)*"×" for n in Tup])[1:end-1] * ")"
+Base.show(io::IO, D::DFunction) = println(io, "DerivableFunction : " * _InputSpace(D) * " ⟶  " * _OutputSpace(D))
