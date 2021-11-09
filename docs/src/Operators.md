@@ -25,5 +25,20 @@ Since the function `Metric` in this example can be represented in terms of analy
 SymJac = GetMatrixJac(Val(:Symbolic), Metric)
 SymJac([1,2.])
 ```
+Currently, [**DerivableFunctions.jl**](https://github.com/RafaelArutjunjan/DerivableFunctions.jl) exports `GetDeriv(), GetGrad(), GetHess(), GetJac(), GetDoubleJac()` and `GetMatrixJac()`.
 
-Currently, [**DerivableFunctions.jl**](https://github.com/RafaelArutjunjan/DerivableFunctions.jl) exports `GetDeriv(), GetGrad(), GetHess(), GetJac()` and `GetMatrixJac()`.
+
+Furthermore, these operators also have in-place versions:
+```@example 1
+Jac! = GetMatrixJac!(Val(:ForwardDiff), Metric)
+Y = Array{Float64}(undef, 2, 2, 2)
+Jac!(Y, [1,2.])
+```
+
+Just like the out-of-place versions, the in-place operators are overloaded for symbolic passthrough:
+```@example 1
+Ynum = Array{Num}(undef, 2, 2, 2)
+Jac!(Ynum, z)
+```
+
+The exported in-place operators include `GetGrad!(), GetHess!(), GetJac!()` and `GetMatrixJac!()`.

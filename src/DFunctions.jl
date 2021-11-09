@@ -46,6 +46,7 @@ end
 
 """
     DerivableFunction(F::Function; ADmode::Union{Val,Symbol}=Val(:Symbolic))
+    DerivableFunction(F::Function, testinput::Union{Number,AbstractVector{<:Number}}; ADmode::Union{Val,Symbol}=Val(:Symbolic))
     DerivableFunction(F::Function, dF::Function; ADmode::Union{Val,Symbol}=Val(:Symbolic))
     DerivableFunction(F::Function, dF::Function, ddF::Function)
 Stores derivatives of a given function (as well as input-output dimensions) for potentially faster computations when derivatives are known.
@@ -55,7 +56,7 @@ mutable struct DerivableFunction <: Function
     dF::Function
     ddF::Function
     InOut::Tuple{Val,Val}
-    function DerivableFunction(F::Function, input::Union{Number,AbstractVector{<:Number}}, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F,input); ADmode::Union{Val,Symbol}=Val(:Symbolic))
+    function DerivableFunction(F::Function, testinput::Union{Number,AbstractVector{<:Number}}, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F,testinput); ADmode::Union{Val,Symbol}=Val(:Symbolic))
         DerivableFunction(F, _GetFirstDeriv(F,InOut;ADmode=ADmode), InOut; ADmode=ADmode)
     end
     function DerivableFunction(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
