@@ -1,21 +1,38 @@
 
 
-function GetInLength(F::Function; kwargs...)
-    In = GetArgLength(F; kwargs...)
-    if In > 1
-        return In
-    elseif In == 1 # return -1 for functions that take Number instead of a Vector of length 1
-        try (F(rand());  return -1) catch; (F(rand(1)); return 1) end
+ProduceTestQuantity(n::Int) = n == -1 ? rand() : (n > 0 ? rand(n) : throw("Got invalid length value $n."))
+ProduceTestQuantity(Tup::Tuple{Vararg{Int}}) = ((@assert all(x->x > 0, Tup) "Got invalid Tuple $Tup."); rand(Tup...))
+
+
+GetOutLength(F::Function, In::Int=_GetArgLength(F)) = GetOutLength(F, ProduceTestQuantity(In))
+"""
+    GetOutLength(F::Function, input::Union{Number,AbstractVector{<:Number}})
+Returns output dimensions of given `F`. If it outputs arrays of more than one dimension, a tuple is returned.
+This can also be used to determine the approximate size of the input for mutating `F` which accept 2 arguments.
+
+!!! note
+    Discriminates between `Real` and `Vector{Real}` of length one, i.e.:
+    `Real`↦`-1` and `x::AbstractVector{<:Real}`↦`length(x)`.
+"""
+function GetOutLength(F::Function, testinput::Union{Number,AbstractVector{<:Number}})
+    if MaximalNumberOfArguments(F) == 1
+        output = F(testinput)
+        output isa Number ? -1 : (output isa AbstractVector ? length(output) : size(output))
+    else
+        _GetArgLengthInPlace(F)[1]
     end
 end
 
-GetOutLength(F::Function, In::Int=GetInLength(F)) = GetOutLength(F, (In == -1 ? rand() : rand(In)))
-function GetOutLength(F::Function, input::Union{Number,AbstractVector{<:Number}})
-    output = F(input)
-    output isa Number ? -1 : (output isa AbstractVector ? length(output) : size(output))
+function GetInOut(F::Function)
+    if MaximalNumberOfArguments(F) == 1
+        In = _GetArgLengthOutOfPlace(F);    Out = GetOutLength(F,In);    (In,Out)
+    else
+        # _GetArgLengthInPlace uses opposite order
+        _GetArgLengthInPlace(F) |> reverse
+    end
 end
-GetInOut(F::Function) = (In = GetInLength(F);    Out = GetOutLength(F,In);    (In,Out))
-GetInOut(F::Function, input::Union{Number, AbstractVector{<:Number}}) = (length(input), GetOutLength(F,input))
+
+GetInOut(F::Function, input::Union{Number, AbstractVector{<:Number}}) = (In = (input isa Number ? -1 : length(input)); (In,GetOutLength(F,input)))
 
 
 function _GetFirstDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
@@ -31,7 +48,6 @@ end
 function _GetSecondDeriv(F::Function, dF::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOut(F); ADmode::Union{Val,Symbol}=Val(:Symbolic))
     if Out(InOut) isa Number && Out(InOut) == -1
         ## For scalar functions, Symbolics often produces false results.
-        # try     GetSymbolicDerivative(F, 1, :hessian)   catch;  x->GetHess(ADmode)(F,x)     end
         In(InOut) == -1 ? GetDeriv(ADmode, dF) : GetHess(Val(:ForwardDiff), F, abs(In(InOut)))
     else
         ## Already know info about dimensions, do not call GetDoubleJac.
@@ -42,7 +58,6 @@ function _GetSecondDeriv(F::Function, InOut::Tuple{Int,Union{Int,Tuple}}=GetInOu
     _GetSecondDeriv(F, _GetFirstDeriv(F,InOut;ADmode=ADmode), InOut; ADmode=ADmode)
 end
 
-# In = -1 for scalar input and 1 for vector input of length 1
 
 """
     DerivableFunction(F::Function; ADmode::Union{Val,Symbol}=Val(:Symbolic))
