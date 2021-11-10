@@ -1,7 +1,7 @@
 name = "DerivableFunctions"
 uuid = "b86e32d1-1d4d-4472-88d2-1980e9d19c92"
 authors = ["Rafael Arutjunjan"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
