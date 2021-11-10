@@ -4,6 +4,7 @@ authors = ["Rafael Arutjunjan"]
 version = "0.1.1"
 
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
@@ -12,6 +13,7 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+DataFrames = "1"
 FiniteDifferences = "0.11, 0.12"
 ForwardDiff = "0.10"
 ModelingToolkit = "5, 6"

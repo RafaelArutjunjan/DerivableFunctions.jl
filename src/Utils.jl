@@ -10,6 +10,8 @@ suff(x::Real) = Float64
 suff(x::Complex) = suff(real(x))
 suff(x::AbstractArray) = suff(x[1])
 suff(x::Tuple) = suff(x...)
+suff(x::DataFrame) = suff(x[1,1])
+suff(x::Union{Nothing, Missing}) = Float64
 suff(args...) = try suff(promote(args...)[1]) catch;  suff(args[1]) end
 
 suff(x::Num) = Num

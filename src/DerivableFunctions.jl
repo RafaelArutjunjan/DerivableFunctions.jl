@@ -1,6 +1,6 @@
 module DerivableFunctions
 
-
+using DataFrames
 using ForwardDiff, ReverseDiff, Zygote, FiniteDifferences
 using ModelingToolkit # To avoid error thrown in _array_for() when using Symbolics.jacobian()
 using Symbolics
