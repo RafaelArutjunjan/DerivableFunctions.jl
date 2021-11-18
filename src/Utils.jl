@@ -63,7 +63,8 @@ function _GetArgLengthOutOfPlace(F::Function; max::Int=100)
             isnothing(res) && throw("Function returned Nothing for i=$i.")
         catch y
             (isa(y, BoundsError) || isa(y, MethodError) || isa(y, DimensionMismatch) || isa(y, ArgumentError) || isa(y, AssertionError)) && continue
-            println("Encountered apparent error in specification of function.");     rethrow()
+            @warn "Encountered apparent error in specification of function."
+            rethrow()
         end
         i < (max + 1) ? (return i) : throw(ArgumentError("Function input appears to have >$max components, aborting. Either increase keyword max or ensure function errors on rand(i) for i larger than true component length."))
     end
@@ -76,7 +77,8 @@ function _GetArgLengthInPlace(F::Function; max::Int=100)
             F(output, input)
         catch y
             if !(isa(y, BoundsError) || isa(y, MethodError) || isa(y, DimensionMismatch) || isa(y, ArgumentError) || isa(y, AssertionError))
-                println("Encountered apparent error in specification of function.");     rethrow()
+                @warn "Encountered apparent error in specification of function."
+                rethrow()
             end
             return nothing
         end;    (FindSubHyperCube(output), (input isa Number ? -1 : length(input)))
