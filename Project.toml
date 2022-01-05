@@ -1,31 +1,24 @@
 name = "DerivableFunctions"
 uuid = "b86e32d1-1d4d-4472-88d2-1980e9d19c92"
 authors = ["Rafael Arutjunjan"]
-version = "0.1.3"
+version = "0.2.0"
 
 [deps]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
+DerivableFunctionsBase = "2a74400c-0885-457e-a858-e4f63fac11e2"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
-Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-DataFrames = "1"
-FiniteDifferences = "0.11, 0.12"
-ForwardDiff = "0.10"
-ModelingToolkit = "5 - 8"
+DerivableFunctionsBase = "0.1"
 ReverseDiff = "1.8, 1.9"
-Symbolics = "2 - 4"
 Zygote = "0.6"
 julia = "1"
 
 [extras]
-RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SafeTestsets", "RuntimeGeneratedFunctions"]
+test = ["Test", "SafeTestsets", "ForwardDiff"]
