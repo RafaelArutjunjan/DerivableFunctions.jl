@@ -1,4 +1,4 @@
-# DerivableFunctions
+# DerivableFunctions.jl
 
 *A Julia package for backend-agnostic differentiation combined with symbolic passthrough.*
 
@@ -6,6 +6,7 @@
 |:-----------------:|:----------------:|
 | [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) | [![Build Status](https://ci.appveyor.com/api/projects/status/github/RafaelArutjunjan/DerivableFunctions.jl?svg=true)](https://ci.appveyor.com/project/RafaelArutjunjan/DerivableFunctions-jl) [![codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/main/graph/badge.svg?token=boWzh2IUO9)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
 
+**Note: Most of the core functionality has been outsourced to** [**DerivableFunctionsBase.jl**](https://github.com/RafaelArutjunjan/DerivableFunctionsBase.jl) **to decrease load times whenever only a single backend is required.**
 
 This package provides a front-end for differentiation operations in Julia that allows for code written by the user to be agnostic with respect to many of the available automatic and symbolic differentiation tools available in Julia. Moreover, the differentiation operators provided by **DerivableFunctions.jl** are overloaded to allow for passthrough of symbolic variables. That is, if symbolic types such as `Symbolics.Num` are detected, the differentiation operators automatically switch to symbolic differentiation.
 
