@@ -11,6 +11,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 DerivableFunctionsBase = "0.1"
+Reexport = "1.1, 1.2"
 ReverseDiff = "1.8, 1.9"
 Zygote = "0.6"
 julia = "1"

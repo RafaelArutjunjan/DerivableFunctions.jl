@@ -14,11 +14,10 @@ import DerivableFunctionsBase: GetSymbolicDerivative, SymbolicPassthrough
 import DerivableFunctionsBase: suff
 suff(x::ReverseDiff.TrackedReal) = typeof(x)
 
-## rewrite
-import DerivableFunctionsBase: diff_backends
-diff_backends() = [:Symbolic, :ForwardDiff, :FiniteDifferences, :ReverseDiff, :Zygote]
-# DerivableFunctionsBase.SetDiff(vcat(deepcopy(DerivableFunctionsBase.DIFF_BACKENDS),[:ReverseDiff, :Zygote]))
-# export diff_backends
+## Add new backends to the output of diff_backends()
+import DerivableFunctionsBase: AddedBackEnds
+AddedBackEnds(::Val{true}) = [:ReverseDiff, :Zygote]
+
 
 import DerivableFunctionsBase: _GetDeriv, _GetGrad, _GetJac, _GetHess, _GetMatrixJac, _GetDoubleJac
 # Deriv not available for ReverseDiff
