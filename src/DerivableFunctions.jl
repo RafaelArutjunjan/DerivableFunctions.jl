@@ -1,7 +1,7 @@
 module DerivableFunctions
 
 using Reexport
-using ReverseDiff, Zygote
+using ReverseDiff, Zygote, FiniteDiff
 
 @reexport using DerivableFunctionsBase
 
@@ -29,6 +29,12 @@ _GetGrad(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwa
 _GetJac(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwargs...) -> Zygote.jacobian(Func, p; kwargs...)[1]
 _GetHess(ADmode::Val{:Zygote}; order::Int=-1, kwargs...) = (Func::Function,p;Kwargs...) -> Zygote.hessian(Func, p; kwargs...)
 
+_GetDeriv(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_derivative
+_GetGrad(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_gradient
+_GetJac(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_jacobian
+_GetHess(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_hessian
+
+
 import DerivableFunctionsBase: _GetDerivPass, _GetGradPass, _GetJacPass, _GetHessPass, _GetDoubleJacPass, _GetMatrixJacPass
 
 
@@ -38,6 +44,14 @@ _GetGrad!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.gradient!
 _GetJac!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.jacobian!
 _GetHess!(ADmode::Val{:ReverseDiff}; kwargs...) = ReverseDiff.hessian!
 _GetMatrixJac!(ADmode::Val{:ReverseDiff}; kwargs...) = _GetJac!(ADmode; kwargs...) # DELIBERATE!!!! _GetJac!() recognizes output format from given Array
+
+
+#_GetDeriv!(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_derivative!
+_GetGrad!(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_gradient!
+_GetJac!(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_jacobian!
+_GetHess!(ADmode::Val{:FiniteDiff}; kwargs...) = FiniteDiff.finite_difference_hessian!
+_GetMatrixJac!(ADmode::Val{:FiniteDiff}; kwargs...) = _GetJac!(ADmode; kwargs...)
+
 
 import DerivableFunctionsBase: _GetGradPass!, _GetJacPass!, _GetHessPass!, _GetMatrixJacPass!
 

@@ -5,12 +5,14 @@ version = "0.2.0"
 
 [deps]
 DerivableFunctionsBase = "2a74400c-0885-457e-a858-e4f63fac11e2"
+FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 DerivableFunctionsBase = "0.1"
+FiniteDiff = "2.6 - 2.8"
 Reexport = "1.1, 1.2"
 ReverseDiff = "1.8, 1.9"
 Zygote = "0.6"
