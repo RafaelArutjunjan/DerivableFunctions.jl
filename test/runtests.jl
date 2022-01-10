@@ -24,6 +24,7 @@ using SafeTestsets
     for ADmode ∈ [:Zygote, :ReverseDiff, :FiniteDifferences]
         MyTest(ADmode)
     end
+    MyTest(:FiniteDiff; atol=0.2)
 
 
     function TestDoubleJac(ADmode::Symbol; atol::Real=2e-5, kwargs...)
@@ -65,4 +66,5 @@ end
     for ADmode ∈ [:Zygote, :ReverseDiff, :FiniteDifferences]
         MyInplaceTest(ADmode)
     end
+    MyInplaceTest(:FiniteDiff; atol=0.2)
 end
