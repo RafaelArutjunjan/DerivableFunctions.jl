@@ -21,7 +21,7 @@ suff(x::ReverseDiff.TrackedReal) = typeof(x)
 
 ## Add new backends to the output of diff_backends()
 import DerivableFunctionsBase: AddedBackEnds
-AddedBackEnds(::Val{true}) = [:ReverseDiff, :Zygote]
+AddedBackEnds(::Val{true}) = [:ReverseDiff, :Zygote, :FiniteDifferences, :FiniteDiff]
 
 include("DifferentiationOperators.jl")
 
