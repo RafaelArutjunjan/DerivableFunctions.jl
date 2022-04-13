@@ -88,5 +88,5 @@ S2metric((θ,ϕ)) = [1.0 0; 0 sin(θ)^2]
 (In this particular instance, due to a term in the `ChristoffelSymbol` where the `sin` in the numerator does not cancel with the identical term in the denominator, the symbolic computation does not recognize the fact that the final expression can be simplified to yield exactly ``R=2``.)
 ```julia
 using Symbolics;  @variables p[1:2]
-RicciScalar(S2metric, p)
+RicciScalar(S2metric, p) |> simplify_fractions
 ```
