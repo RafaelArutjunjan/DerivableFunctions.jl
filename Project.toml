@@ -1,7 +1,7 @@
 name = "DerivableFunctions"
 uuid = "b86e32d1-1d4d-4472-88d2-1980e9d19c92"
 authors = ["Rafael Arutjunjan"]
-version = "0.2.1"
+version = "0.3"
 
 [deps]
 DerivableFunctionsBase = "2a74400c-0885-457e-a858-e4f63fac11e2"
@@ -12,7 +12,7 @@ ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-DerivableFunctionsBase = "0.1"
+DerivableFunctionsBase = "0.2"
 FiniteDiff = "2"
 FiniteDifferences = "0.11, 0.12"
 Reexport = "1.1, 1.2"
