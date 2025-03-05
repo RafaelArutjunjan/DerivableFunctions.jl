@@ -48,7 +48,7 @@ The exported in-place operators include `GetGrad!(), GetHess!(), GetJac!()` and 
 
 ## Differentiation Backend-Agnostic Programming
 
-Essentially, the abstraction layer provided by **DerivableFunctions.jl** only requires the user to specify the "semantic" meaning of a given differentiation operation while allowing for flexible post hoc choice of backend as well as enabling symbolic pass through for the resulting computation.
+Essentially, the abstraction layer provided by [**DerivableFunctions.jl**](https://github.com/RafaelArutjunjan/DerivableFunctions.jl) only requires the user to specify the "semantic" meaning of a given differentiation operation while allowing for flexible post hoc choice of backend as well as enabling symbolic pass through for the resulting computation.
 
 For example, when calculating differential-geometric quantities such as the Riemann or Ricci tensors, which depend on complicated combinations of up to second derivatives of the components of the metric tensor, a single implementation simultaneously provides a performant numerical implementation as well as allowing for analytical insight for simple examples.
 ```julia
