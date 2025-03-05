@@ -17,7 +17,7 @@ FiniteDiff = "2"
 FiniteDifferences = "0.11, 0.12"
 Reexport = "1.1, 1.2"
 ReverseDiff = "1.8, 1.9"
-Zygote = "0.6"
+Zygote = "0.6, 0.7"
 julia = "1"
 
 [extras]
