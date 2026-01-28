@@ -4,7 +4,7 @@
 
 | **Documentation** | **Build Status** |
 |:-----------------:|:----------------:|
-| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) | [![Build Status](https://ci.appveyor.com/api/projects/status/github/RafaelArutjunjan/DerivableFunctions.jl?svg=true)](https://ci.appveyor.com/project/RafaelArutjunjan/DerivableFunctions-jl) [![codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/main/graph/badge.svg?token=boWzh2IUO9)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
+| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) | [![![Build status](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml) [![codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/main/graph/badge.svg?token=boWzh2IUO9)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
 
 **Note: Most of the core functionality has been outsourced to** [**DerivableFunctionsBase.jl**](https://github.com/RafaelArutjunjan/DerivableFunctionsBase.jl) **to decrease load times whenever only a single backend is required.**
 
