@@ -4,7 +4,7 @@
 
 | **Documentation** | **Build Status** |
 |:-----------------:|:----------------:|
-| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) | [![![Build status](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml) [![codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/main/graph/badge.svg?token=boWzh2IUO9)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
+| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev) | [![Build status](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/RafaelArutjunjan/DerivableFunctions.jl/actions/workflows/CI.yml) [![codecov](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl/branch/main/graph/badge.svg?token=boWzh2IUO9)](https://codecov.io/gh/RafaelArutjunjan/DerivableFunctions.jl) |
 
 **Note: Most of the core functionality has been outsourced to** [**DerivableFunctionsBase.jl**](https://github.com/RafaelArutjunjan/DerivableFunctionsBase.jl) **to decrease load times whenever only a single backend is required.**
 
@@ -13,6 +13,11 @@ This package provides a front-end for differentiation operations in Julia that a
 In addition to these operators, **DerivableFunctions.jl** also provides the `DFunction` type, which stores methods for the first and second derivatives to allow for more convenient and potentially more performant computations if the derivatives are known.
 
 For detailed examples, please see the [**documentation**](https://RafaelArutjunjan.github.io/DerivableFunctions.jl/dev).
+
+
+Aside from direct support for backends such as [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl), [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl), [Zygote.jl](https://github.com/FluxML/Zygote.jl), [FiniteDifferences.jl](https://github.com/JuliaDiff/FiniteDifferences.jl) and [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl), **DerivableFunctions.jl** also allows for passthrough to [**DifferentiationInterface.jl**](https://github.com/JuliaDiff/DifferentiationInterface.jl) and all its supported backends in the differentiation operators by wrapping the corresponding `ADType` in a `Val`, e.g. as `Val(AutoEnzyme())`.
+
+
 
 ```julia
 julia> D = DFunction(x->[exp(x[1]^2 - x[2]), log(sin(x[2]))])

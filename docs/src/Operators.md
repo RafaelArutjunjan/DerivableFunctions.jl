@@ -5,6 +5,8 @@
 
 The desired backend is optionally specified in the first argument (default is ForwardDiff) via a `Symbol` or `Val`. The available backends can be listed via `diff_backends()`.
 
+Moreover, it also allows for passthrough to [**DifferentiationInterface.jl**](https://github.com/JuliaDiff/DifferentiationInterface.jl) and all its supported backends in the differentiation operators by wrapping the corresponding `ADType` in a `Val`, e.g. as `Val(AutoEnzyme())`.
+
 Next, the function that is to be differentiated is provided. We will illustrate this syntax using the `GetMatrixJac` method:
 ```@example 1
 using DerivableFunctions
